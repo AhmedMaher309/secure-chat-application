@@ -45,23 +45,9 @@ def create_server(p, g, a, q):
             connection, address = server.accept()
             print(f"Connected to {address}")
 
-
-            # establish el gamal signature 
-            Xa2 = 3
-            Ya2 = pow(a,Xa2) % q 
-            connection.send(str(Ya2).encode())
-            Yb2 = int(connection.recv(1024).decode())
-            print("the key is yb2 ", Yb2)
             # establish the deffie hellman key
             Xa = 4
             Ya = pow(g,Xa) % p 
-
-            #signing Alice public key
-            S1a, S2a = gamal.Signing_key(a,q,Ya,Xa2)
-            # Convert numbers to a string with a delimiter (e.g., comma)
-            gamal_parameters_str = ','.join(map(str, [S1a, S2a]))
-            print(gamal_parameters_str)
-            connection.send(gamal_parameters_str.encode())
 
             connection.send(str(Ya).encode())
             Y_other = int(connection.recv(1024).decode())
@@ -81,32 +67,10 @@ def create_client(p, g, a, q):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client.connect(('localhost', 9999))
 
-    # establish el gamal signature
-    Xb2 = 1
-    Yb2 = pow(a,Xb2)%q
-    client.send(str(Yb2).encode())
-    Ya2 = int(client.recv(1024).decode())
-    print("the key is ya2   ", Ya2)
-
-    # stablish the deffie helman key
-    Xb = 3
-    Yb = pow(g,Xb)%p
-
-    #verifying alice signature
-
-    # Receive the string containing the numbers
-    Alice_gamal = client.recv(1024).decode()
-    #print(Alice_gamal)
-    Alice_gamal_list = Alice_gamal.split(',')
-    Alice_gamal_cleaned_list = [x for x in Alice_gamal_list if x != '']
-    # # Convert each element to an integer
-    Alice_gamal_integers = [int(x) for x in Alice_gamal_cleaned_list if x.strip()]
-    print(Alice_gamal_integers)
-
-
-
 
     # establish the deffie helman key
+    Xb = 3
+    Yb = pow(g,Xb)%p
     client.send(str(Yb).encode())
     Y_other = int(client.recv(1024).decode())
     key = pow(Y_other, Xb) % p
