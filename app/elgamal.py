@@ -49,8 +49,23 @@ class Elgamal:
             file.write(str(self.q) + "\n")
             file.write(str(self.a))
     
+    # @staticmethod
+    # def get_m(M, max):
+    #     # Calculate the SHA-1 hash of the input number
+    #     sha1 = hashlib.sha1()
+    #     sha1.update(str(M).encode('utf-8'))
+        
+    #     # Get the hash digest
+    #     digest = sha1.digest()
 
-    def get_m(self, M, max):
+    #     # Take the last byte of the digest
+    #     M = digest[-1]
+
+    #     return M
+
+    @staticmethod
+    def get_m(M, max):
+        
         # Calculate the SHA-1 hash of the input number
         sha1_hash = hashlib.sha1(str(M).encode('utf-8')).hexdigest()
 
@@ -67,40 +82,41 @@ class Elgamal:
         LSB = sha1_int & ((1 << (num_bits_range_max-1)) - 1)
         return LSB
     
+    @staticmethod
+    def extended_gcd( a, b):
+        if b == 0:
+            return (a, 0, 1)
+        else:
+            d, y1, y2 = Elgamal.extended_gcd(b, a % b)
+            return (d, y2 - y1 * (a // b), y1)
 
     #calculate modulo inverse
-    def mod_of_inverse(self, number, modulus):
+    @staticmethod
+    def mod_of_inverse(number, modulus):
         # Calculate the inverse of the number modulo modulus
-        inverse = pow(number, -1, modulus)
-        modulus_of_inverse = inverse % modulus
-        return modulus_of_inverse
+        inverse = Elgamal.extended_gcd(number, modulus)[2]
+        return inverse
     
-    
-    def Verify_signature(self,paramater_list,a,q):
-        V=pow(paramater_list[0],paramater_list[1])*pow(paramater_list[1],paramater_list[2])
-        m=self.get_m(paramater_list[0],q-1)
-        W=pow(a,m)
-        if(V==W):
-            return True
-        else:
-            return False
+    @staticmethod
+    def Verify_signature(S1, S2, Y, Y_dh, a, q):
+        V = (pow(S1, S2) % q) * (pow(Y, S1) % q)
+        m = Elgamal.get_m(Y_dh, q-1)
+        W = pow(a, m) % q
+        return V == W
 
-
-    def Signing_key(self,a,q,Ya,Xa2):
-            M=Ya
-            m=self.get_m(M,q-1)
-
-            #generate K a random integer
-            #Ka = int(random.random()) + random.randint(q, a)
-            if a>q:
-                Ka = random.randint(q, a)
-            else:
-                Ka = random.randint(a, q)
-            S1a=pow(a,Ka) % q
-            Ka_inv=self.mod_of_inverse(Ka,q-1)   
-            S2a=Ka_inv*(m-Xa2*S1a)%(q-1)
-
-            #Sending the parameters to BOb
-            return S1a,S2a          
+    @staticmethod
+    def Signing_key(a, q, Ya, Xa2):
+        M = Ya
+        m = Elgamal.get_m(M, q-1)
+        #generate K a random integer
+        Ka = random.randint(2, q-2)
+        while Elgamal.extended_gcd(Ka, q-1)[0] != 1:
+            Ka = random.randint(2, q-2)
+        S1a = pow(a,Ka) % q
+        Ka_inv = Elgamal.mod_of_inverse(Ka, q-1)   
+        S2a = Ka_inv*(m-Xa2*S1a)%(q-1)
+        if S2a <= 0:
+           return Elgamal.Signing_key(a,q,Ya,Xa2)
+        return S1a, S2a          
     
 

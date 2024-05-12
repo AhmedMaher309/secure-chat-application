@@ -34,7 +34,7 @@ def main():
     mode = input("start a peer using start command\n")
     if mode == "start":
         p, g = retrieve_dh("DH.txt")
-        a, q = retrieve_elgamal("gamal.txt")
+        q, a = retrieve_elgamal("gamal.txt")
         peer.start_peer(p, g, a, q)
 
 if __name__ == "__main__":
