@@ -49,19 +49,6 @@ class Elgamal:
             file.write(str(self.q) + "\n")
             file.write(str(self.a))
     
-    # @staticmethod
-    # def get_m(M, max):
-    #     # Calculate the SHA-1 hash of the input number
-    #     sha1 = hashlib.sha1()
-    #     sha1.update(str(M).encode('utf-8'))
-        
-    #     # Get the hash digest
-    #     digest = sha1.digest()
-
-    #     # Take the last byte of the digest
-    #     M = digest[-1]
-
-    #     return M
 
     @staticmethod
     def get_m(M, max):
@@ -79,7 +66,7 @@ class Elgamal:
         #step2:1000 -1 = 0111
         #step3:ANDing with sha1 int 
         #minus 1 from the bits to ensure it is less than q
-        LSB = sha1_int & ((1 << (num_bits_range_max-1)) - 1)
+        LSB = sha1_int & ((1 << (num_bits_range_max)) - 1)
         return LSB
     
     @staticmethod
@@ -99,7 +86,7 @@ class Elgamal:
     
     @staticmethod
     def Verify_signature(S1, S2, Y, Y_dh, a, q):
-        V = (pow(S1, S2) % q) * (pow(Y, S1) % q)
+        V = (pow(S1, S2) * pow(Y, S1)) % q
         m = Elgamal.get_m(Y_dh, q-1)
         W = pow(a, m) % q
         return V == W
@@ -114,7 +101,7 @@ class Elgamal:
             Ka = random.randint(2, q-2)
         S1a = pow(a,Ka) % q
         Ka_inv = Elgamal.mod_of_inverse(Ka, q-1)   
-        S2a = Ka_inv*(m-Xa2*S1a)%(q-1)
+        S2a = (Ka_inv*(m-Xa2*S1a)) %(q-1)
         if S2a <= 0:
            return Elgamal.Signing_key(a,q,Ya,Xa2)
         return S1a, S2a          

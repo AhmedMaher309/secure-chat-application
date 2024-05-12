@@ -74,9 +74,9 @@ def create_server(p, g, a, q):
             Y_other = int(connection.recv(1024).decode())
             verify = Elgamal.Verify_signature(S1b, S2b, Yb2, Y_other, a, q)
 
-            # if verify == False:
-            #     print("the key is not verified")
-            #     return -1
+            if verify == False:
+                print("the key is not verified")
+                return -1
             
             key = pow(Y_other, Xa) % p
             key = sha256(str(key).encode()).digest()
@@ -120,9 +120,9 @@ def create_client(p, g, a, q):
     client.send(str(Yb).encode())
     verify = Elgamal.Verify_signature(S1a, S2a, Ya2, Y_other, a, q)
 
-    # if verify == False:
-    #     print("the key is not verified")
-    #     return -1
+    if verify == False:
+        print("the key is not verified")
+        return -1
 
     key = pow(Y_other, Xb) % p
     key = sha256(str(key).encode()).digest()
